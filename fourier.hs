@@ -44,6 +44,11 @@ showPolyTrig pt = case pt of
   Trig c f w -> (showTerm c) ++ (show f) ++ (showTerm w)
 
 showSolution :: [([Term], [Term])] -> String
+showSolution [] = ""
+showSolution ((xp, xt):(yp, yt):zs) = "(" ++ (intercalate " + " (map showTerm xp)) ++ ")(" ++
+                                      (showTerm (head xt)) ++ ") - (" ++
+                                      (intercalate " + " (map showTerm yp)) ++ ")(" ++
+                                      (showTerm (head yt)) ++ ")" ++ " + " ++ showSolution zs
 showSolution s = intercalate " + " $ map (\(p, t) ->
       "(" ++ (intercalate " + " (map showTerm p)) ++ ")(" ++ (showTerm (head t)) ++ ")") s
 
@@ -84,15 +89,6 @@ differentiatePoly :: PolyTrig -> PolyTrig
 differentiatePoly (Poly f) = Poly $ map (differentiatePolyComponent)
                       (filter (\(_, e) -> e > 0) f)
 
--- differentiateTrig :: PolyTrig -> PolyTrig
--- differentiateTrig (Trig c f w) = Trig cw fp w
---   where cw = multPolyTerms c w
---         fp = case f of
---           Sin -> Cos
---           Cos -> MSin
---           MSin -> MCos
---           MCos -> Sin
-
 antiDifferentiateTrig :: PolyTrig -> PolyTrig
 antiDifferentiateTrig (Trig c f w) = Trig rp fp w
   where rp = multPolyTerms c (invertTerm w)
@@ -108,3 +104,7 @@ integrate [f, t] a b = case (f, t) of
   (_, _) -> [((evaluatePolyTrig f b), (evaluatePolyTrig (antiDifferentiateTrig t) b))] ++
             [((evaluatePolyTrig f a), (evaluatePolyTrig (antiDifferentiateTrig t) a))] ++
             (integrate [(differentiatePoly f), (antiDifferentiateTrig t)] a b)
+
+test :: Int -> String
+test i = case i of
+  1 -> showSolution $ integrate [Poly [((Constant ["3"]), 2), ((Constant ["4"]), 1)], Trig (Constant ["1"]) Sin (Constant ["p"])] (Constant ["a"]) (Constant ["b"])
