@@ -48,7 +48,10 @@ showSolution [] = ""
 showSolution ((xp, xt):(yp, yt):zs) = "(" ++ (intercalate " + " (map showTerm xp)) ++ ")(" ++
                                       (showTerm (head xt)) ++ ") - (" ++
                                       (intercalate " + " (map showTerm yp)) ++ ")(" ++
-                                      (showTerm (head yt)) ++ ")" ++ " + " ++ showSolution zs
+                                      (showTerm (head yt)) ++ ")" ++
+                                      (case zs of
+                                        [] -> ""
+                                        _ -> " + " ++ showSolution zs)
 showSolution s = intercalate " + " $ map (\(p, t) ->
       "(" ++ (intercalate " + " (map showTerm p)) ++ ")(" ++ (showTerm (head t)) ++ ")") s
 
@@ -108,3 +111,4 @@ integrate [f, t] a b = case (f, t) of
 test :: Int -> String
 test i = case i of
   1 -> showSolution $ integrate [Poly [((Constant ["3"]), 2), ((Constant ["4"]), 1)], Trig (Constant ["1"]) Sin (Constant ["p"])] (Constant ["a"]) (Constant ["b"])
+  2 -> showSolution $ integrate [Poly [((Constant ["-A"]), 2), ((Constant ["A", "L"]), 1)], Trig (Constant ["1"]) Sin (Ratio ["n", "p"] ["L"])] (Constant ["0"]) (Constant ["L"])
