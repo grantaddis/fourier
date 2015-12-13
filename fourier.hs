@@ -9,14 +9,23 @@ data TrigFunction = Sin | Cos | MSin | MCos deriving (Show)
 
 data PolyTrig = Poly [(Term, Int)] | Trig Term TrigFunction Term
 
-prodIntConcatString :: String -> (Int, String) -> (Int, String)
+prodIntConcatString :: String -> (Int, [String]) -> (Int, [String])
 prodIntConcatString v (i, s) = case reads v :: [(Int, String)] of
   [(n, "")] -> (i * n, s)
-  _ -> (i, s ++ v)
+  _ -> (i, s ++ [v])
+
+repToExp :: [String] -> String
+repToExp e = foldr (\s -> let p = (length . filter (==s) $ e) in
+                     (++ (case p of
+                                1 -> s
+                                _ -> "(" ++ s ++ "^" ++ (show p) ++ ")"))) "" (nub e)
 
 simplifyExp :: [String] -> String
-simplifyExp s = (show t) ++ v
-  where (t, v) = foldr (prodIntConcatString) (1, "") s
+simplifyExp s = case (t, repToExp v) of
+  (1, []) -> "1"
+  (1, vs) -> vs
+  (_, vs) -> (show t) ++ vs
+  where (t, v) = foldr (prodIntConcatString) (1, []) s
 
 showTerm :: Term -> String
 showTerm t = case t of
