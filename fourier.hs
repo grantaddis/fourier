@@ -29,13 +29,28 @@ simplifyExp s = case (t, repToExp v) of
 
 showTerm :: Term -> String
 showTerm t = case t of
-  Constant xs -> simplifyExp xs
-  Ratio xs ys -> "(" ++ (simplifyExp xs) ++ "/" ++ (simplifyExp ys) ++ ")"
-  TrigValue c f x -> case f of
-    Sin -> (showTerm c) ++ "sin(" ++ (showTerm x) ++ ")"
-    Cos -> (showTerm c) ++ "cos(" ++ (showTerm x) ++ ")"
-    MSin -> "-" ++ (showTerm c) ++ "sin(" ++ (showTerm x) ++ ")"
-    MCos -> "-" ++ (showTerm c) ++ "cos(" ++ (showTerm x) ++ ")"
+  Constant xs -> case (length . filter (=="0") $ xs) > 0 of
+    True -> "0"
+    False -> simplifyExp xs
+  Ratio xs ys -> case (length . filter (=="0") $ xs) > 0 of
+    True -> "0"
+    False -> "(" ++ (simplifyExp xs) ++ "/" ++ (simplifyExp ys) ++ ")"
+  TrigValue c f x -> case (showTerm c) of
+    "0" -> "0"
+    _ -> (let sinx = (case (showTerm c, showTerm x) of
+                       ("0", _) -> "0"
+                       (_, "0") -> "0"
+                       (cs, xs) -> cs ++ "sin(" ++ xs ++ ")")
+              cosx = (case (showTerm c, showTerm x) of
+                       ("0", _) -> "0"
+                       (cs, "0") -> cs
+                       (cs, xs) -> cs ++ "cos(" ++ xs ++ ")") in
+          (case f of
+            Sin -> sinx
+            Cos -> cosx
+            MSin -> "-" ++ sinx
+            MCos -> "-" ++ cosx))
+      
 
 showPolyTrig :: PolyTrig -> String
 showPolyTrig pt = case pt of
@@ -111,4 +126,4 @@ integrate [f, t] a b = case (f, t) of
 test :: Int -> String
 test i = case i of
   1 -> showSolution $ integrate [Poly [((Constant ["3"]), 2), ((Constant ["4"]), 1)], Trig (Constant ["1"]) Sin (Constant ["p"])] (Constant ["a"]) (Constant ["b"])
-  2 -> showSolution $ integrate [Poly [((Constant ["-A"]), 2), ((Constant ["A", "L"]), 1)], Trig (Constant ["1"]) Sin (Ratio ["n", "p"] ["L"])] (Constant ["0"]) (Constant ["L"])
+  2 -> showSolution $ integrate [Poly [((Constant ["-A"]), 2), ((Constant ["A", "L"]), 1)], Trig (Constant ["1"]) Sin (Ratio ["n", "pi"] ["L"])] (Constant ["0"]) (Constant ["L"])
