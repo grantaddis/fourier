@@ -2,6 +2,7 @@ module FSeries where
 
 import Data.Char
 import Data.List
+import System.IO
 
 data Term = Constant [String] | Ratio [String] [String] | TrigValue Term TrigFunction Term
 
@@ -127,3 +128,7 @@ test :: Int -> String
 test i = case i of
   1 -> showSolution $ integrate [Poly [((Constant ["3"]), 2), ((Constant ["4"]), 1)], Trig (Constant ["1"]) Sin (Constant ["p"])] (Constant ["a"]) (Constant ["b"])
   2 -> showSolution $ integrate [Poly [((Constant ["-A"]), 2), ((Constant ["A", "L"]), 1)], Trig (Constant ["1"]) Sin (Ratio ["n", "pi"] ["L"])] (Constant ["0"]) (Constant ["L"])
+
+main = do
+  putStrLn $ "The integral from a to b of (3x^2 + 4x)(sin(p)) is " ++ test 1
+  putStrLn $ "The Fourier terms for -Ax^2 + ALx on a string of length L is " ++ test 2
